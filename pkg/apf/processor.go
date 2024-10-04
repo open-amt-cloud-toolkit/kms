@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"unicode/utf8"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -79,22 +78,20 @@ func Process(data []byte, session *Session) bytes.Buffer {
 			log.Error(err)
 		}
 	}
-
+	fmt.Printf("bin_buf: %x\n", bin_buf.Bytes())
 	return bin_buf
 }
-func ProcessKeepAliveRequest(data []byte, session *Session) APF_KEEPALIVE_REPLY_MESSAGE {
+func ProcessKeepAliveRequest(data []byte, session *Session) any {
 	if len(data) < 5 {
 		log.Warn("APF_KEEPALIVE_REQUEST message too short")
 		return APF_KEEPALIVE_REPLY_MESSAGE{}
 	}
 	cookie := binary.BigEndian.Uint32(data[1:5])
 	log.Debugf("received APF_KEEPALIVE_REQUEST with cookie: %d", cookie)
-	// Send KEEPALIVE_REPLY with the same cookie
-	r := rune(APF_KEEPALIVE_REPLY)
-	buf := make([]byte, 2)      // UTF-8 encoding can take up to 4 bytes
-	_ = utf8.EncodeRune(buf, r) // Encode the rune into the byte slice
+
 	reply := APF_KEEPALIVE_REPLY_MESSAGE{
 		MessageType: APF_KEEPALIVE_REPLY,
+		Cookie:      cookie,
 	}
 	return reply
 }

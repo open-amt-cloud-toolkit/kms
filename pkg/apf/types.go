@@ -97,7 +97,8 @@ type APF_MESSAGE_HEADER struct {
 }
 
 type APF_KEEPALIVE_REPLY_MESSAGE struct {
-	MessageType uint16
+	MessageType byte
+	Cookie      uint32
 }
 
 /**
