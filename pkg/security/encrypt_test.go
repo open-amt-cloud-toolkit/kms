@@ -12,7 +12,7 @@ func TestEncrypt(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		message       []byte
+		message       string
 		key           string
 		expectedError expectedError
 		errorMsg      error
@@ -20,15 +20,15 @@ func TestEncrypt(t *testing.T) {
 	}{
 		{
 			name:          "successful encryption",
-			message:       []byte("test message"),
+			message:       "test message",
 			key:           validKey,
 			expectedError: expectedError{},
 			errorMsg:      nil,
-			expected:      []byte("test message"),
+			expected:      "test message",
 		},
 		{
 			name:          "key too short",
-			message:       []byte("test message"),
+			message:       "test message",
 			key:           shortKey,
 			expectedError: expectedError{InvalidKeySizeError: true},
 			errorMsg:      aes.KeySizeError(8),
@@ -45,19 +45,21 @@ func TestEncrypt(t *testing.T) {
 
 			var encryptedString string
 
-			cryptor := Crypto{}
+			cryptor := Crypto{
+				EncryptionKey: tc.key,
+			}
 
 			if !tc.expectedError.Base64Error && !tc.expectedError.NewCipherError && !tc.expectedError.AuthenticationError && !tc.expectedError.FileReadError && !tc.expectedError.InvalidKeySizeError {
-				encryptedString, err = cryptor.Encrypt(tc.message, tc.key)
+				encryptedString, err = cryptor.Encrypt(tc.message)
 				assert.NoError(t, err)
 				assert.NotEmpty(t, encryptedString)
-				decryptedMessage, err := cryptor.Decrypt(encryptedString, []byte(tc.key))
+				decryptedMessage, err := cryptor.Decrypt(encryptedString)
 				assert.NoError(t, err)
 				assert.Equal(t, tc.expected, decryptedMessage)
 			}
 
 			if tc.expectedError.InvalidKeySizeError {
-				_, err = cryptor.Encrypt(tc.message, tc.key)
+				_, err = cryptor.Encrypt(tc.message)
 				assert.Equal(t, tc.errorMsg, err)
 				assert.Equal(t, tc.expected, encryptedString)
 			}

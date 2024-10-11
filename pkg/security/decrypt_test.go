@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	validKey           = "ThisismyveryStrongkey32byteslong"
-	wrongKey           = "ThisismyveryStrongkey32bytelong!"
+	validKey           = "Jf3Q2nXJ+GZzN1dbVQms0wbB4+i/5PjL"
+	wrongKey           = "Jf3Q2nXJ+GZzN1dbVQms0wbB4+iwrong"
 	shortKey           = "shortKey"
 	missingKey         = ""
 	validMessageText   = "Hello, World!"
@@ -111,7 +111,7 @@ func TestDecrypt(t *testing.T) {
 		key           string
 		expectedError expectedError
 		errorMsg      error
-		expected      []byte
+		expected      string
 	}{
 		{
 			name:          "successful decryption",
@@ -119,7 +119,7 @@ func TestDecrypt(t *testing.T) {
 			key:           validKey,
 			expectedError: expectedError{},
 			errorMsg:      nil,
-			expected:      []byte("Hello World"),
+			expected:      "Hello World",
 		},
 		{
 			name:          "fail to decode base64",
@@ -127,7 +127,7 @@ func TestDecrypt(t *testing.T) {
 			key:           validKey,
 			expectedError: expectedError{Base64Error: true},
 			errorMsg:      base64.CorruptInputError(7),
-			expected:      nil,
+			expected:      "",
 		},
 		{
 			name:          "fail to create new cipher",
@@ -135,7 +135,7 @@ func TestDecrypt(t *testing.T) {
 			key:           missingKey,
 			expectedError: expectedError{NewCipherError: true},
 			errorMsg:      aes.KeySizeError(0),
-			expected:      nil,
+			expected:      "",
 		},
 	}
 
@@ -146,27 +146,29 @@ func TestDecrypt(t *testing.T) {
 
 			var err error
 
-			var decryptedString []byte
+			var decryptedString string
 
-			cryptor := Crypto{}
+			cryptor := Crypto{
+				EncryptionKey: tc.key,
+			}
 
 			if tc.expectedError.Base64Error {
-				_, err = cryptor.Decrypt(tc.message, []byte(tc.key))
+				_, err = cryptor.Decrypt(tc.message)
 				assert.Equal(t, tc.errorMsg, err)
 				assert.Equal(t, tc.expected, decryptedString)
 			}
 
 			if tc.expectedError.NewCipherError {
-				encryptedString, _ := cryptor.Encrypt([]byte(tc.message), tc.key)
-				decryptedString, err = cryptor.Decrypt(encryptedString, []byte(tc.key))
+				encryptedString, _ := cryptor.Encrypt(tc.message)
+				decryptedString, err = cryptor.Decrypt(encryptedString)
 				assert.Equal(t, tc.errorMsg, err)
 				assert.Equal(t, tc.expected, decryptedString)
 			}
 
 			if !tc.expectedError.Base64Error && !tc.expectedError.NewCipherError {
-				encryptedString, _ := cryptor.Encrypt([]byte(tc.message), tc.key)
-				decryptedString, err = cryptor.Decrypt(encryptedString, []byte(tc.key))
-				assert.Equal(t, tc.message, string(decryptedString))
+				encryptedString, _ := cryptor.Encrypt(tc.message)
+				decryptedString, err = cryptor.Decrypt(encryptedString)
+				assert.Equal(t, tc.message, decryptedString)
 				assert.NoError(t, err)
 			}
 		})
@@ -183,7 +185,7 @@ func TestReadAndDecryptFile(t *testing.T) {
 		key           string
 		expectedError expectedError
 		errorMsg      error
-		expected      []byte
+		expected      string
 	}{
 		{
 			name:          "successful decryption",
@@ -191,7 +193,7 @@ func TestReadAndDecryptFile(t *testing.T) {
 			key:           validKey,
 			expectedError: expectedError{},
 			errorMsg:      nil,
-			expected:      byteArrayConfigFile,
+			expected:      string(byteArrayConfigFile),
 		},
 		{
 			name:          "incorrect key size",
@@ -199,7 +201,7 @@ func TestReadAndDecryptFile(t *testing.T) {
 			key:           shortKey,
 			expectedError: expectedError{InvalidKeySizeError: true},
 			errorMsg:      aes.KeySizeError(8),
-			expected:      []byte("Hello World"),
+			expected:      "",
 		},
 		{
 			name:          "incorrect key",
@@ -207,7 +209,7 @@ func TestReadAndDecryptFile(t *testing.T) {
 			key:           wrongKey,
 			expectedError: expectedError{AuthenticationError: true},
 			errorMsg:      errors.New("cipher: message authentication failed"),
-			expected:      []byte("Hello World"),
+			expected:      "",
 		},
 		{
 			name:          "unable to read file",
@@ -215,7 +217,7 @@ func TestReadAndDecryptFile(t *testing.T) {
 			key:           validKey,
 			expectedError: expectedError{FileReadError: true},
 			errorMsg:      &fs.PathError{Op: "open", Path: "testing/doesnotexist.yaml", Err: syscall.ENOENT},
-			expected:      []byte(""),
+			expected:      "",
 		},
 	}
 
@@ -224,11 +226,13 @@ func TestReadAndDecryptFile(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			cryptor := Crypto{}
-			_, err := cryptor.ReadAndDecryptFile(test.filePath, []byte(test.key))
+			cryptor := Crypto{
+				EncryptionKey: test.key,
+			}
+			_, err := cryptor.ReadAndDecryptFile(test.filePath)
 
 			if !test.expectedError.InvalidKeySizeError && !test.expectedError.AuthenticationError && !test.expectedError.NewCipherError && !test.expectedError.Base64Error && !test.expectedError.FileReadError {
-				decryptedFile, err := cryptor.ReadAndDecryptFile(test.filePath, []byte(test.key))
+				decryptedFile, err := cryptor.ReadAndDecryptFile(test.filePath)
 				assert.Equal(t, expectedConfigFile, decryptedFile)
 				assert.NoError(t, err)
 			} else {

@@ -9,8 +9,8 @@ import (
 )
 
 // Encrypt encrypts a string.
-func (c Crypto) Encrypt(plainText []byte, key string) (string, error) {
-	block, err := aes.NewCipher([]byte(key))
+func (c Crypto) Encrypt(plainText string) (string, error) {
+	block, err := aes.NewCipher([]byte(c.EncryptionKey))
 	if err != nil {
 		return "", err
 	}
@@ -26,9 +26,9 @@ func (c Crypto) Encrypt(plainText []byte, key string) (string, error) {
 		return "", err
 	}
 
-	ciphertext := gcm.Seal(nonce, nonce, plainText, nil)
+	cipherText := gcm.Seal(nonce, nonce, []byte(plainText), nil)
 
-	return base64.StdEncoding.EncodeToString(ciphertext), nil
+	return base64.StdEncoding.EncodeToString(cipherText), nil
 }
 
 func (c Crypto) GenerateKey() string {

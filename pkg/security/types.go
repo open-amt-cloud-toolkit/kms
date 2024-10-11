@@ -7,13 +7,15 @@ import (
 )
 
 type Cryptor interface {
-	Decrypt(cipherText string, key []byte) ([]byte, error)
-	Encrypt(plainText []byte, key string) (string, error)
+	Decrypt(cipherText string) (string, error)
+	Encrypt(plainText string) (string, error)
 	GenerateKey() string
-	ReadAndDecryptFile(filePath string, key []byte) (config.Configuration, error)
+	ReadAndDecryptFile(filePath string) (config.Configuration, error)
 }
 
-type Crypto struct{}
+type Crypto struct {
+	EncryptionKey string
+}
 
 type Storager interface {
 	GetKeyValue(key string) (string, error)
