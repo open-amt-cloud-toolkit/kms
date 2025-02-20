@@ -184,11 +184,11 @@ func TestPositiveAMT_MessageLog(t *testing.T) {
 				"should return a valid amt_MessageLog GetRecords wsman message",
 				AMTMessageLog,
 				`http://intel.com/wbem/wscim/1/amt-schema/1/AMT_MessageLog/GetRecords`,
-				`<h:GetRecords_INPUT xmlns:h="http://intel.com/wbem/wscim/1/amt-schema/1/AMT_MessageLog"><h:IterationIdentifier>1</h:IterationIdentifier><h:MaxReadRecords>390</h:MaxReadRecords></h:GetRecords_INPUT>`,
+				`<h:GetRecords_INPUT xmlns:h="http://intel.com/wbem/wscim/1/amt-schema/1/AMT_MessageLog"><h:IterationIdentifier>1</h:IterationIdentifier><h:MaxReadRecords>10</h:MaxReadRecords></h:GetRecords_INPUT>`,
 				func() (Response, error) {
 					client.CurrentMessage = "GetRecords"
 
-					return elementUnderTest.GetRecords(1)
+					return elementUnderTest.GetRecords(1, 10)
 				},
 				Body{
 					XMLName: xml.Name{Space: message.XMLBodySpace, Local: "Body"},
@@ -446,11 +446,11 @@ func TestNegativeAMT_MessageLog(t *testing.T) {
 				"should return a valid amt_MessageLog GetRecords wsman message",
 				AMTMessageLog,
 				`http://intel.com/wbem/wscim/1/amt-schema/1/AMT_MessageLog/GetRecords`,
-				`<h:GetRecords_INPUT xmlns:h="http://intel.com/wbem/wscim/1/amt-schema/1/AMT_MessageLog"><h:IterationIdentifier>1</h:IterationIdentifier><h:MaxReadRecords>390</h:MaxReadRecords></h:GetRecords_INPUT>`,
+				`<h:GetRecords_INPUT xmlns:h="http://intel.com/wbem/wscim/1/amt-schema/1/AMT_MessageLog"><h:IterationIdentifier>1</h:IterationIdentifier><h:MaxReadRecords>10</h:MaxReadRecords></h:GetRecords_INPUT>`,
 				func() (Response, error) {
 					client.CurrentMessage = wsmantesting.CurrentMessageError
 
-					return elementUnderTest.GetRecords(1)
+					return elementUnderTest.GetRecords(1, 10)
 				},
 				Body{
 					XMLName: xml.Name{Space: message.XMLBodySpace, Local: "Body"},

@@ -6,6 +6,7 @@
 package client
 
 import (
+	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -76,6 +77,41 @@ func TestNewClient_TLS(t *testing.T) {
 
 	if client.useDigest != cp.UseDigest {
 		t.Errorf("Expected useDigest to be %v, but got %v", cp.UseDigest, client.useDigest)
+	}
+}
+
+func TestNewClient_WithTLSConfig(t *testing.T) {
+	expectedTarget := "https://example.com:16993/wsman"
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+
+	cp := Parameters{
+		Target:            "example.com",
+		Username:          "user",
+		Password:          "password",
+		UseDigest:         false,
+		UseTLS:            true,
+		SelfSignedAllowed: true,
+		LogAMTMessages:    false,
+		TlsConfig:         tlsConfig,
+	}
+
+	client := NewWsman(cp)
+
+	if client.endpoint != expectedTarget {
+		t.Errorf("Expected endpoint to be %s, but got %s", expectedTarget, client.endpoint)
+	}
+
+	if client.tlsConfig != tlsConfig {
+		t.Errorf("Expected tlsConfig to be the same instance as the one passed, but got a different instance")
+	}
+
+	transport, ok := client.Transport.(*http.Transport)
+	if !ok {
+		t.Fatal("Expected client.Transport to be of type *http.Transport")
+	}
+
+	if transport.TLSClientConfig != tlsConfig {
+		t.Errorf("Expected TLSClientConfig to be the provided tlsConfig, but got a different instance")
 	}
 }
 

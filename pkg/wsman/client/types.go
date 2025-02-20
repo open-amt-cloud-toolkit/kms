@@ -1,6 +1,7 @@
 package client
 
 import (
+	"crypto/tls"
 	"net"
 	"net/http"
 )
@@ -18,4 +19,5 @@ type Parameters struct {
 	IsRedirection     bool
 	PinnedCert        string
 	Connection        net.Conn
+	TlsConfig         *tls.Config
 }

@@ -157,3 +157,10 @@ type GetRecords_INPUT struct {
 	IterationIdentifier int      `xml:"h:IterationIdentifier"` // An identifier for the iterator.
 	MaxReadRecords      int      `xml:"h:MaxReadRecords"`      // Maximum number of records to read
 }
+
+const (
+	// Intel AMT can return 400 records in a single GetRecords call, but we limit it to 390.
+	MaxAMTRecords = 390
+	// DefaultRecords is the default number of records to retrieve when no valid count is specified.
+	DefaultRecords = 120
+)

@@ -35,7 +35,9 @@ func Process(data []byte, session *Session) bytes.Buffer {
 	case APF_GLOBAL_REQUEST: // 80
 		log.Debug("received APF_GLOBAL_REQUEST")
 
-		dataToSend = ProcessGlobalRequest(data)
+		if ValidateGlobalRequest(data) {
+			dataToSend = ProcessGlobalRequest(data)
+		}
 	case APF_CHANNEL_OPEN: // (90) Sent by Intel AMT when a channel needs to be open from Intel AMT. This is not common, but WSMAN events are a good example of channel coming from AMT.
 		log.Debug("received APF_CHANNEL_OPEN")
 	case APF_DISCONNECT: // (1) Intel AMT wants to completely disconnect. Not sure when this happens.
@@ -43,29 +45,45 @@ func Process(data []byte, session *Session) bytes.Buffer {
 	case APF_SERVICE_REQUEST: // (5)
 		log.Debug("received APF_SERVICE_REQUEST")
 
-		dataToSend = ProcessServiceRequest(data)
+		if ValidateServiceRequest(data) {
+			dataToSend = ProcessServiceRequest(data)
+		}
 	case APF_CHANNEL_OPEN_CONFIRMATION: // (91) Intel AMT confirmation to an APF_CHANNEL_OPEN request.
 		log.Debug("received APF_CHANNEL_OPEN_CONFIRMATION")
 
-		ProcessChannelOpenConfirmation(data, session)
+		if ValidateChannelOpenConfirmation(data) {
+			ProcessChannelOpenConfirmation(data, session)
+		}
 	case APF_CHANNEL_OPEN_FAILURE: // (92) Intel AMT rejected our connection attempt.
 		log.Debug("received APF_CHANNEL_OPEN_FAILURE")
 
-		ProcessChannelOpenFailure(data, session)
+		if ValidateChannelOpenFailure(data) {
+			ProcessChannelOpenFailure(data, session)
+		}
 	case APF_CHANNEL_CLOSE: // (97) Intel AMT is closing this channel, we need to disconnect the LMS TCP connection
 		log.Debug("received APF_CHANNEL_CLOSE")
 
-		ProcessChannelClose(data, session)
+		if ValidateChannelClose(data) {
+			ProcessChannelClose(data, session)
+		}
 	case APF_CHANNEL_DATA: // (94) Intel AMT is sending data that we must relay into an LMS TCP connection.
-		ProcessChannelData(data, session)
+		log.Debug("received APF_CHANNEL_DATA")
+
+		if ValidateChannelData(data) {
+			ProcessChannelData(data, session)
+		}
 	case APF_CHANNEL_WINDOW_ADJUST: // 93
 		log.Debug("received APF_CHANNEL_WINDOW_ADJUST")
 
-		ProcessChannelWindowAdjust(data, session)
+		if ValidateChannelWindowAdjust(data) {
+			ProcessChannelWindowAdjust(data, session)
+		}
 	case APF_PROTOCOLVERSION: // 192
 		log.Debug("received APF PROTOCOL VERSION")
 
-		dataToSend = ProcessProtocolVersion(data)
+		if ValidateProtocolVersion(data) {
+			dataToSend = ProcessProtocolVersion(data)
+		}
 	case APF_USERAUTH_REQUEST: // 50
 		log.Debug("received APF_USERAUTH_REQUEST")
 		dataToSend = ProcessUserAuthRequest(data, session)

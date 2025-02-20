@@ -50,7 +50,7 @@ var (
 							AuthenticationMethod: "WPA3 SAE",
 							EncryptionMethod:     "CCMP",
 							Priority:             1,
-							IEEE8021x: config.IEEE8021x{
+							IEEE8021x: &config.IEEE8021x{
 								AuthenticationProtocol: 0,
 								Username:               "",
 								Password:               "",
@@ -229,6 +229,7 @@ func TestReadAndDecryptFile(t *testing.T) {
 			cryptor := Crypto{
 				EncryptionKey: test.key,
 			}
+
 			_, err := cryptor.ReadAndDecryptFile(test.filePath)
 
 			if !test.expectedError.InvalidKeySizeError && !test.expectedError.AuthenticationError && !test.expectedError.NewCipherError && !test.expectedError.Base64Error && !test.expectedError.FileReadError {

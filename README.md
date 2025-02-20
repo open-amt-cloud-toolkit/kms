@@ -6,44 +6,97 @@
 [![OSSF-Scorecard Score](https://img.shields.io/ossf-scorecard/github.com/open-amt-cloud-toolkit/go-wsman-messages?style=for-the-badge&label=OSSF%20Score)](https://api.securityscorecards.dev/projects/github.com/open-amt-cloud-toolkit/go-wsman-messages)
 [![Discord](https://img.shields.io/discord/1063200098680582154?style=for-the-badge&label=Discord&logo=discord&logoColor=white&labelColor=%235865F2&link=https%3A%2F%2Fdiscord.gg%2FDKHeUNEWVH)](https://discord.gg/DKHeUNEWVH)
 
-
 > Disclaimer: Production viable releases are tagged and listed under 'Releases'.  All other check-ins should be considered 'in-development' and should not be used in production
 
-This repository contains a Go library that implements APIs for communicating with Intel® Active Management Technology (AMT) capable platforms. These APIs are based on the AMT SDK documentation, which can be found [here](https://software.intel.com/content/www/us/en/develop/articles/intel-active-management-technology-software-development-kit-sdk.html).
+This repository contains a Go library that implements APIs for communicating with Intel® Active Management Technology (AMT) capable platforms. These APIs are based on the AMT SDK documentation, which can be found [here](https://www.intel.com/content/www/us/en/developer/tools/active-management-technology-sdk/overview.html).
 
 ## How to use it
 
-To use this library, you need to import it in your Go project:
+A few steps are required to use the library in your code.
+
+1. Import the library in your project,
+1. Provide the connection parameters,
+1. Create the desired messages to act on the AMT device.
+
+See the commented source code as follows:
+
 ``` go
-import "github.com/open-amt-cloud-toolkit/go-wsman-messages"
-```
+package main
 
-Then, you can create an instance of the wsman.Messages struct by passing in the client parameters using the client.Parameters struct. For example:
+import (
+    "fmt"
+    // 1. Import the library
+    "github.com/open-amt-cloud-toolkit/go-wsman-messages/v2/pkg/wsman"
+    "github.com/open-amt-cloud-toolkit/go-wsman-messages/v2/pkg/wsman/client"
+)
 
-```go
-clientParams := client.Parameters{
-    Target:             "192.168.0.120",
-    Username:           "admin",
-    Password:           "amtP@ssw0rd",
-    UseDigest:          true,
-    UseTLS:             true,
-    SelfSignedAllowed:  true,
-    LogAMTMessages:     true,
+func main() {
+    // 2. Provide the connection parameters
+    clientParams := client.Parameters{
+        Target:            "192.168.1.164",
+        Username:          "admin",          
+        Password:          "Your_AMT_Password",
+        UseDigest:         true,
+        UseTLS:            true,
+        SelfSignedAllowed: true,
+        LogAMTMessages:    true,
+    }
+
+    // 3.a Create an instance to send the messages and defer the close of the connection.
+    // NewMessages instantiates a new Messages class with client connection parameters.
+    // Messages implements client.WSMan, amt.Messages, cim.Messages, and ips.Messages.
+    amtClass := wsman.NewMessages(clientParams)
+    defer amtClass.Client.CloseConnection()
+
+    // 3.b Query the AMT General Settings
+    gset, err := amtClass.AMT.GeneralSettings.Get()
+    if err != nil {
+        fmt.Println("Error getting AMT General Settings:", err)
+        return
+    } else {
+        fmt.Println("")
+        fmt.Println("AMT General Settings: ")
+        fmt.Println(string(gset.JSON()))
+    }
+
+    // 3.c Recover the Audit Log in chronological order, starting with the oldest one (i.e., 1)
+    alog, err := amtClass.AMT.AuditLog.ReadRecords(1)
+    if err != nil {
+        fmt.Println("Error getting AMT Audit Log:", err)
+        return
+    } else {
+        fmt.Println("")
+        fmt.Println("AMT Audit Log: ")
+        fmt.Println(string(alog.JSON()))
+    }
+
+    // 3.d Get the Processor Information
+    aproc, err := amtClass.CIM.Processor.Get()
+    if err != nil {
+        fmt.Println("Error getting Processor Info:", err)
+        return
+    } else {
+        fmt.Println("")
+        fmt.Println("Processor Info: ")
+        fmt.Println(string(aproc.JSON()))
+    }
+
+    // 3.d Get the Power Management Service Information
+    power, err := amtClass.CIM.PowerManagementService.Get()
+    if err != nil {
+        fmt.Println("Error getting Power Info:", err)
+        return
+    } else {
+        fmt.Println("")
+        fmt.Println("Power Info: ")
+        fmt.Println(string(power.JSON()))
+    }
 }
-wsmanMessages := wsman.NewMessages(clientParams)
 ```
 
-Next, you can call the various methods of the wsman.Messages struct.  Go-wsman-messages will authenticate with AMT using the client parameters provided and send the message to the Intel® AMT device and handle the response, returning a package specific Response struct or error message.  For example, to get the general settings of an Intel® AMT device, you can do:
+As shown, you can call the various methods of the wsman.Messages struct. go-wsman-messages authenticates with AMT using the client parameters provided, sends messages to the Intel® AMT device, and handles responses, returning a package-specific Response struct or error message.
 
-```go
-response, err := wsmanMessages.AMT.GeneralSettings.Get()
-if err != nil {
-    // handle error
-}
-// process response
-```
-
-# Dev tips for passing CI Checks
+## Dev tips for passing CI Checks
 
 - Install gofumpt `go install mvdan.cc/gofumpt@latest` (replaces gofmt)
 - Install gci `go install github.com/daixiang0/gci@latest` (organizes imports)

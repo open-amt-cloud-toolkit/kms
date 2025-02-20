@@ -68,6 +68,7 @@ type Target struct {
 	UseTLS             bool
 	InsecureSkipVerify bool
 	PinnedCert         string
+	tlsConfig          *tls.Config
 }
 
 const timeout = 10 * time.Second
@@ -93,6 +94,7 @@ func NewWsman(cp Parameters) *Target {
 		logAMTMessages:     cp.LogAMTMessages,
 		UseTLS:             cp.UseTLS,
 		InsecureSkipVerify: cp.SelfSignedAllowed,
+		tlsConfig:          cp.TlsConfig,
 	}
 
 	res.Timeout = timeout
@@ -121,7 +123,11 @@ func NewWsman(cp Parameters) *Target {
 				},
 			}
 		} else {
-			config = &tls.Config{InsecureSkipVerify: cp.SelfSignedAllowed}
+			if res.tlsConfig != nil {
+				config = res.tlsConfig
+			} else {
+				config = &tls.Config{InsecureSkipVerify: cp.SelfSignedAllowed}
+			}
 		}
 
 		res.Transport = &http.Transport{

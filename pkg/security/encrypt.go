@@ -10,7 +10,12 @@ import (
 
 // Encrypt encrypts a string.
 func (c Crypto) Encrypt(plainText string) (string, error) {
-	block, err := aes.NewCipher([]byte(c.EncryptionKey))
+	return c.EncryptWithKey(plainText, c.EncryptionKey)
+}
+
+// Encrypt encrypts a string with provided key.
+func (c Crypto) EncryptWithKey(plainText, key string) (string, error) {
+	block, err := aes.NewCipher([]byte(key))
 	if err != nil {
 		return "", err
 	}

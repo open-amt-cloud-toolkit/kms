@@ -105,15 +105,21 @@ func (messageLog Service) Pull(enumerationContext string) (response Response, er
 // GetRecords retrieves multiple records from event log.
 // The IterationIdentifier input parameter is a numeric value (starting at 1) which is the position of the first record in the log that should be extracted.
 // MaxReadRecords is set to 390.  If NoMoreRecords returns false, call this again setting the identifier to the start of the next IterationIdentifier.
-func (messageLog Service) GetRecords(identifier int) (response Response, err error) {
+func (messageLog Service) GetRecords(identifier, maxReadRecords int) (response Response, err error) {
 	if identifier < 1 {
 		identifier = 1
+	}
+
+	if maxReadRecords < 1 {
+		maxReadRecords = DefaultRecords
+	} else if maxReadRecords > MaxAMTRecords {
+		maxReadRecords = MaxAMTRecords
 	}
 
 	header := messageLog.base.WSManMessageCreator.CreateHeader(methods.GenerateAction(AMTMessageLog, GetRecords), AMTMessageLog, nil, "", "")
 	body := messageLog.base.WSManMessageCreator.CreateBody(methods.GenerateInputMethod(GetRecords), AMTMessageLog, &GetRecords_INPUT{
 		IterationIdentifier: identifier,
-		MaxReadRecords:      390,
+		MaxReadRecords:      maxReadRecords,
 	})
 
 	response = Response{

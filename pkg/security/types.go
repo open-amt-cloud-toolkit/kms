@@ -9,6 +9,7 @@ import (
 type Cryptor interface {
 	Decrypt(cipherText string) (string, error)
 	Encrypt(plainText string) (string, error)
+	EncryptWithKey(plainText, key string) (string, error)
 	GenerateKey() string
 	ReadAndDecryptFile(filePath string) (config.Configuration, error)
 }
