@@ -2,6 +2,7 @@ package client
 
 import (
 	"crypto/tls"
+	"net"
 	"net/http"
 )
 
@@ -17,5 +18,6 @@ type Parameters struct {
 	Transport         http.RoundTripper
 	IsRedirection     bool
 	PinnedCert        string
+	Connection        net.Conn
 	TlsConfig         *tls.Config
 }
