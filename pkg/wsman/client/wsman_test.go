@@ -81,11 +81,11 @@ func TestNewClient_TLS(t *testing.T) {
 }
 
 func TestNewClient_WithTLSConfig(t *testing.T) {
-	expectedTarget := "https://example.com:16993/wsman"
+	expectedTarget := "https://example2.com:16993/wsman"
 	tlsConfig := &tls.Config{InsecureSkipVerify: true}
 
 	cp := Parameters{
-		Target:            "example.com",
+		Target:            "example2.com",
 		Username:          "user",
 		Password:          "password",
 		UseDigest:         false,
@@ -165,7 +165,7 @@ func newMockDigestAuthHandler(username, password string, handler http.Handler) h
 			}
 		} else {
 			// Simulate a server requesting digest authentication with required fields
-			w.Header().Set("WWW-Authenticate", `Digest realm="example.com", nonce="mock-nonce", qop="auth", opaque="opaque-data", algorithm=MD5`)
+			w.Header().Set("WWW-Authenticate", `Digest realm="example2.com", nonce="mock-nonce", qop="auth", opaque="opaque-data", algorithm=MD5`)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		}
 	})

@@ -116,16 +116,16 @@ func (certificate Certificate) Pull(enumerationContext string) (response Respons
 
 // Put will change properties of the selected instance.
 func (certificate Certificate) Put(instanceID, cert string) (response Response, err error) {
-	selector := message.Selector{
+	selector := []message.Selector{{
 		Name:  "InstanceID",
 		Value: instanceID,
-	}
+	}}
 	publicKeyCertificate := PublicKeyCertificateRequest{}
 	publicKeyCertificate.X509Certificate = cert
 	publicKeyCertificate.H = fmt.Sprintf("%s%s", message.AMTSchema, AMTPublicKeyCertificate)
 	response = Response{
 		Message: &client.Message{
-			XMLInput: certificate.base.Put(publicKeyCertificate, true, &selector),
+			XMLInput: certificate.base.Put(publicKeyCertificate, true, selector),
 		},
 	}
 	// send the message to AMT

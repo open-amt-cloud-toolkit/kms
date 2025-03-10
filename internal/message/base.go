@@ -35,7 +35,12 @@ func (b *Base) Enumerate() string {
 
 // Get retrieves the representation of the instance.
 func (b *Base) Get(selector *Selector) string {
-	header := b.WSManMessageCreator.CreateHeader(BaseActionsGet, b.className, selector, "", "")
+	selectors := []Selector{}
+	if selector != nil {
+		selectors = append(selectors, *selector)
+	}
+
+	header := b.WSManMessageCreator.CreateHeader(BaseActionsGet, b.className, selectors, "", "")
 
 	return b.WSManMessageCreator.CreateXML(header, GetBody)
 }
@@ -50,21 +55,21 @@ func (b *Base) Pull(enumerationContext string) string {
 
 // Delete removes a the specified instance.
 func (b *Base) Delete(selector Selector) string {
-	header := b.WSManMessageCreator.CreateHeader(BaseActionsDelete, b.className, &selector, "", "")
+	header := b.WSManMessageCreator.CreateHeader(BaseActionsDelete, b.className, []Selector{selector}, "", "")
 
 	return b.WSManMessageCreator.CreateXML(header, DeleteBody)
 }
 
 // Put will change properties of the selected instance.
-func (b *Base) Put(data interface{}, useHeaderSelector bool, customSelector *Selector) string {
-	if customSelector == nil {
-		customSelector = &Selector{Name: "InstanceID", Value: fmt.Sprintf("%v", data)}
+func (b *Base) Put(data interface{}, useHeaderSelector bool, selectorSet []Selector) string {
+	if selectorSet == nil {
+		selectorSet = []Selector{{Name: "InstanceID", Value: fmt.Sprintf("%v", data)}}
 	}
 
 	var header string
 
 	if useHeaderSelector {
-		header = b.WSManMessageCreator.CreateHeader(BaseActionsPut, b.className, customSelector, "", "")
+		header = b.WSManMessageCreator.CreateHeader(BaseActionsPut, b.className, selectorSet, "", "")
 	} else {
 		header = b.WSManMessageCreator.CreateHeader(BaseActionsPut, b.className, nil, "", "")
 	}
@@ -75,8 +80,8 @@ func (b *Base) Put(data interface{}, useHeaderSelector bool, customSelector *Sel
 }
 
 // Creates a new instance of this class.
-func (b *Base) Create(data interface{}, selector *Selector) string {
-	header := b.WSManMessageCreator.CreateHeader(BaseActionsCreate, b.className, selector, "", "")
+func (b *Base) Create(data interface{}, selectorSet []Selector) string {
+	header := b.WSManMessageCreator.CreateHeader(BaseActionsCreate, b.className, selectorSet, "", "")
 	body := b.WSManMessageCreator.createCommonBodyCreateOrPut(b.className, data)
 
 	return b.WSManMessageCreator.CreateXML(header, body)

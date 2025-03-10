@@ -99,13 +99,13 @@ func (settingData SettingData) Pull(enumerationContext string) (response Respons
 // This method will not modify the flash ("Enabled" property) until setupandconfiguration.CommitChanges() is issued and performed successfully.
 func (settingData SettingData) Put(instanceID string, tlsSettingData SettingDataRequest) (response Response, err error) {
 	tlsSettingData.H = fmt.Sprintf("%s%s", message.AMTSchema, AMTTLSSettingData)
-	selector := message.Selector{
+	selector := []message.Selector{{
 		Name:  "InstanceID",
 		Value: instanceID,
-	}
+	}}
 	response = Response{
 		Message: &client.Message{
-			XMLInput: settingData.base.Put(tlsSettingData, true, &selector),
+			XMLInput: settingData.base.Put(tlsSettingData, true, selector),
 		},
 	}
 	// send the message to AMT

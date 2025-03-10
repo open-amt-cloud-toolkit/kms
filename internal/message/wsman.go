@@ -30,7 +30,7 @@ func (w WSManMessageCreator) CreateXML(header, body string) string {
 	return w.XMLCommonPrefix + header + body + w.XMLCommonEnd
 }
 
-func (w *WSManMessageCreator) CreateHeader(action, wsmanClass string, selector *Selector, address, timeout string) string {
+func (w *WSManMessageCreator) CreateHeader(action, wsmanClass string, selectorSet []Selector, address, timeout string) string {
 	header := "<Header>"
 	header += fmt.Sprintf(`<a:Action>%s</a:Action><a:To>/wsman</a:To><w:ResourceURI>%s%s</w:ResourceURI><a:MessageID>%d</a:MessageID><a:ReplyTo>`, action, w.ResourceURIBase, wsmanClass, w.MessageID)
 
@@ -50,8 +50,8 @@ func (w *WSManMessageCreator) CreateHeader(action, wsmanClass string, selector *
 		header += fmt.Sprintf(`<w:OperationTimeout>%s</w:OperationTimeout>`, w.DefaultTimeout)
 	}
 
-	if selector != nil {
-		header += w.createSelector(*selector)
+	if selectorSet != nil {
+		header += w.createSelector(selectorSet)
 	}
 
 	header += "</Header>"
@@ -109,12 +109,22 @@ func (w WSManMessageCreator) CreateBody(method, wsmanClass string, data interfac
 // createSelector creates a WSMAN string based on Selector Set information provided.
 // It can be used in the header or body.
 // selectorSet is the selector data being passed in. It could take many forms depending on the WSMAN call.
-func (w *WSManMessageCreator) createSelector(selectorSet Selector) string {
-	if selectorSet.Name != "" {
-		return fmt.Sprintf(`<w:SelectorSet><w:Selector Name=%q>%s</w:Selector></w:SelectorSet>`, selectorSet.Name, selectorSet.Value)
+func (w *WSManMessageCreator) createSelector(selectorSet []Selector) string {
+	var selectors strings.Builder
+
+	if len(selectorSet) == 0 {
+		return ""
 	}
 
-	return ""
+	selectors.WriteString("<w:SelectorSet>")
+
+	for _, selector := range selectorSet {
+		selectors.WriteString(fmt.Sprintf(`<w:Selector Name=%q>%s</w:Selector>`, selector.Name, selector.Value))
+	}
+
+	selectors.WriteString("</w:SelectorSet>")
+
+	return selectors.String()
 }
 
 // createSelectorObjectForBody creates an object for the body using the given selector.

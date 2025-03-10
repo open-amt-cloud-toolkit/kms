@@ -11,9 +11,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/open-amt-cloud-toolkit/go-wsman-messages/v2/pkg/wsman/client"
+	"github.com/stretchr/testify/assert"
 )
 
 type MockClient struct {
@@ -91,7 +90,7 @@ func TestBaseWithClient(t *testing.T) {
 
 	t.Run("Put", func(t *testing.T) {
 		data := TestData
-		customSelector := &Selector{Name: "Key", Value: "Value"}
+		customSelector := []Selector{{Name: "Key", Value: "Value"}}
 		expected := fmt.Sprintf("<?xml version=\"1.0\" encoding=\"utf-8\"?><Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" xmlns:w=\"http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd\" xmlns=\"http://www.w3.org/2003/05/soap-envelope\"><Header><a:Action>http://schemas.xmlsoap.org/ws/2004/09/transfer/Put</a:Action><a:To>/wsman</a:To><w:ResourceURI>test-uriTestClass</w:ResourceURI><a:MessageID>%d</a:MessageID><a:ReplyTo><a:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</a:Address></a:ReplyTo><w:OperationTimeout>PT60S</w:OperationTimeout><w:SelectorSet><w:Selector Name=\"Key\">Value</w:Selector></w:SelectorSet></Header><Body><string>test-data</string></Body></Envelope>", MessageID)
 		MessageID++
 		actual := base.Put(data, true, customSelector)
@@ -110,7 +109,7 @@ func TestBaseWithClient(t *testing.T) {
 
 	t.Run("Create", func(t *testing.T) {
 		data := TestData
-		selector := &Selector{Name: "Key", Value: "Value"}
+		selector := []Selector{{Name: "Key", Value: "Value"}}
 		expected := fmt.Sprintf("<?xml version=\"1.0\" encoding=\"utf-8\"?><Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" xmlns:w=\"http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd\" xmlns=\"http://www.w3.org/2003/05/soap-envelope\"><Header><a:Action>http://schemas.xmlsoap.org/ws/2004/09/transfer/Create</a:Action><a:To>/wsman</a:To><w:ResourceURI>test-uriTestClass</w:ResourceURI><a:MessageID>%d</a:MessageID><a:ReplyTo><a:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</a:Address></a:ReplyTo><w:OperationTimeout>PT60S</w:OperationTimeout><w:SelectorSet><w:Selector Name=\"Key\">Value</w:Selector></w:SelectorSet></Header><Body><string>test-data</string></Body></Envelope>", MessageID)
 		MessageID++
 		actual := base.Create(data, selector)
@@ -164,7 +163,7 @@ func TestBase(t *testing.T) {
 
 	t.Run("Put", func(t *testing.T) {
 		data := TestData
-		customSelector := &Selector{Name: "Key", Value: "Value"}
+		customSelector := []Selector{{Name: "Key", Value: "Value"}}
 		expected := fmt.Sprintf("<?xml version=\"1.0\" encoding=\"utf-8\"?><Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" xmlns:w=\"http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd\" xmlns=\"http://www.w3.org/2003/05/soap-envelope\"><Header><a:Action>http://schemas.xmlsoap.org/ws/2004/09/transfer/Put</a:Action><a:To>/wsman</a:To><w:ResourceURI>test-uriTestClass</w:ResourceURI><a:MessageID>%d</a:MessageID><a:ReplyTo><a:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</a:Address></a:ReplyTo><w:OperationTimeout>PT60S</w:OperationTimeout><w:SelectorSet><w:Selector Name=\"Key\">Value</w:Selector></w:SelectorSet></Header><Body><string>test-data</string></Body></Envelope>", MessageID)
 		MessageID++
 		actual := base.Put(data, true, customSelector)
@@ -183,7 +182,7 @@ func TestBase(t *testing.T) {
 
 	t.Run("Create", func(t *testing.T) {
 		data := TestData
-		selector := &Selector{Name: "Key", Value: "Value"}
+		selector := []Selector{{Name: "Key", Value: "Value"}}
 		expected := fmt.Sprintf("<?xml version=\"1.0\" encoding=\"utf-8\"?><Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" xmlns:w=\"http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd\" xmlns=\"http://www.w3.org/2003/05/soap-envelope\"><Header><a:Action>http://schemas.xmlsoap.org/ws/2004/09/transfer/Create</a:Action><a:To>/wsman</a:To><w:ResourceURI>test-uriTestClass</w:ResourceURI><a:MessageID>%d</a:MessageID><a:ReplyTo><a:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</a:Address></a:ReplyTo><w:OperationTimeout>PT60S</w:OperationTimeout><w:SelectorSet><w:Selector Name=\"Key\">Value</w:Selector></w:SelectorSet></Header><Body><string>test-data</string></Body></Envelope>", MessageID)
 		MessageID++
 		actual := base.Create(data, selector)

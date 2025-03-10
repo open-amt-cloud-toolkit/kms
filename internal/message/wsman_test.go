@@ -40,7 +40,7 @@ func TestCreateXML(t *testing.T) {
 
 func TestCreateHeader(t *testing.T) {
 	messageID := 0
-	selector := Selector{Name: "InstanceID", Value: "Intel(r) AMT Device 0"}
+	selector := []Selector{{Name: "InstanceID", Value: "Intel(r) AMT Device 0"}}
 	wsmanMessageCreator := NewWSManMessageCreator("http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/")
 
 	t.Run("creates a correct header with action, resourceUri, and messageId provided for createHeader", func(t *testing.T) {
@@ -69,7 +69,7 @@ func TestCreateHeader(t *testing.T) {
 
 	t.Run("applies custom selector correctly in createHeader", func(t *testing.T) {
 		correctHeader := fmt.Sprintf(`<Header><a:Action>http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate</a:Action><a:To>/wsman</a:To><w:ResourceURI>http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ServiceAvailableToElement</w:ResourceURI><a:MessageID>%d</a:MessageID><a:ReplyTo><a:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</a:Address></a:ReplyTo><w:OperationTimeout>PT30S</w:OperationTimeout><w:SelectorSet><w:Selector Name="InstanceID">Intel(r) AMT Device 0</w:Selector></w:SelectorSet></Header>`, messageID)
-		header := wsmanMessageCreator.CreateHeader(BaseActionsEnumerate, "CIM_ServiceAvailableToElement", &selector, "", "PT30S")
+		header := wsmanMessageCreator.CreateHeader(BaseActionsEnumerate, "CIM_ServiceAvailableToElement", selector, "", "PT30S")
 		messageID++
 
 		assert.Equal(t, correctHeader, header)

@@ -87,13 +87,13 @@ func (sd SettingData) Pull(enumerationContext string) (response Response, err er
 // Put will change properties of the selected instance.
 func (sd SettingData) Put(environmentDetectionSettingData EnvironmentDetectionSettingDataRequest) (response Response, err error) {
 	environmentDetectionSettingData.H = fmt.Sprintf("%s%s", message.AMTSchema, AMTEnvironmentDetectionSettingData)
-	selector := message.Selector{
+	selector := []message.Selector{{
 		Name:  "InstanceID",
 		Value: "Intel(r) AMT Environment Detection Settings",
-	}
+	}}
 	response = Response{
 		Message: &client.Message{
-			XMLInput: sd.base.Put(environmentDetectionSettingData, true, &selector),
+			XMLInput: sd.base.Put(environmentDetectionSettingData, true, selector),
 		},
 	}
 	// send the message to AMT

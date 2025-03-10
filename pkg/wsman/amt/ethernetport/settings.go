@@ -93,13 +93,13 @@ func (s Settings) Pull(enumerationContext string) (response Response, err error)
 // Put will change properties of the selected instance.
 func (s Settings) Put(instanceID string, ethernetPortSettings SettingsRequest) (response Response, err error) {
 	ethernetPortSettings.H = fmt.Sprintf("%s%s", message.AMTSchema, AMTEthernetPortSettings)
-	selector := message.Selector{
+	selector := []message.Selector{{
 		Name:  "InstanceID",
 		Value: instanceID,
-	}
+	}}
 	response = Response{
 		Message: &client.Message{
-			XMLInput: s.base.Put(ethernetPortSettings, true, &selector),
+			XMLInput: s.base.Put(ethernetPortSettings, true, selector),
 		},
 	}
 	// send the message to AMT
