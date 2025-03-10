@@ -16,7 +16,7 @@ const (
 	// Unknown.
 	Unknown OSPowerSavingState = 0 // Unknown OS Power Saving State
 
-	// Unsupported
+	// Unsupported.
 	Unsupported OSPowerSavingState = 1 // Unsupported
 
 	// Full Power.

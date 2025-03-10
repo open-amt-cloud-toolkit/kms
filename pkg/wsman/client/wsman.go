@@ -21,9 +21,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/open-amt-cloud-toolkit/go-wsman-messages/v2/pkg/amterror"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -127,6 +126,21 @@ func NewWsman(cp Parameters) *Target {
 				config = res.tlsConfig
 			} else {
 				config = &tls.Config{InsecureSkipVerify: cp.SelfSignedAllowed}
+
+				if cp.AllowInsecureCipherSuites {
+					defaultCipherSuites := tls.CipherSuites()
+					config.CipherSuites = make([]uint16, 0, len(defaultCipherSuites)+3)
+
+					for _, suite := range defaultCipherSuites {
+						config.CipherSuites = append(config.CipherSuites, suite.ID)
+					}
+					// add the weak cipher suites
+					config.CipherSuites = append(config.CipherSuites,
+						tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
+						tls.TLS_RSA_WITH_AES_128_CBC_SHA,
+						tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+					)
+				}
 			}
 		}
 
